@@ -1,0 +1,55 @@
+*nudge.nvim* Cursor-driven code explanations and concise diagnostics.
+
+==============================================================================
+Contents                                                            *nudge*
+
+  Setup |nudge-setup|
+  Health |nudge-health|
+  Behavior |nudge-behavior|
+
+==============================================================================
+Setup                                                        *nudge-setup*
+
+Nudge does not define keymaps. Configure it from your plugin manager:
+>
+  require("nudge").setup {
+    endpoint = "https://example.com/v1/chat/completions",
+    model = "your-model",
+    api_key_env = "OPENAI_API_KEY",
+    language = "en",
+    languages = {
+      en = {
+        name = "English",
+        max_characters = 100,
+        example = "Maps characters to integer tokens.",
+      },
+    },
+  }
+<
+The endpoint must support streaming OpenAI-compatible chat completions. The API
+key is read from |$|api_key_env; if unset, Nudge sends `Bearer local`.
+
+==============================================================================
+Health                                                       *nudge-health*
+
+Run:
+>
+  :checkhealth nudge
+<
+It checks for curl and reports whether setup and the configured API-key
+variable are present.
+
+==============================================================================
+Behavior                                                   *nudge-behavior*
+
+After the cursor is idle on a meaningful Tree-sitter node, Nudge streams an
+explanation below that line. Earlier explanations collapse to a lightbulb.
+Blank, comment, and syntax-only lines are ignored.
+
+For errors and meaningful warnings, Nudge requests a concise diagnostic before
+streaming the explanation. The Nudge diagnostic temporarily takes the focused
+line's virtual-text position, while the original diagnostic remains available
+to normal diagnostic navigation and lists.
+
+==============================================================================
+vim:tw=78:ts=8:noet:ft=help

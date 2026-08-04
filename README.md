@@ -9,7 +9,7 @@ one lightbulb marker. Errors and meaningful warnings first receive a short
 
 ## Requirements
 
-- Neovim with Tree-sitter parsing
+- Neovim 0.10+ with Tree-sitter parsing
 - `curl`
 - An OpenAI-compatible streaming `/v1/chat/completions` endpoint
 
@@ -48,5 +48,10 @@ uses `Bearer local`, which works with many local OpenAI-compatible servers.
   the original diagnostic virtual text; the original diagnostic still exists for
   navigation and lists.
 
-This is an initial standalone extraction. Configuration and transport are
-intentional public surface; keymaps remain the consuming config's choice.
+## Health and development
+
+Run `:checkhealth nudge` to verify `curl` and setup. For a local checkout,
+`make check` runs formatting and a headless setup smoke test.
+
+Configuration and transport are intentional public surface; keymaps remain the
+consuming config's choice.
