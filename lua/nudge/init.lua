@@ -23,7 +23,17 @@ local function payload(messages, max_tokens)
 	}
 end
 
+local function prepare_item(item)
+	if not item.context then
+		item.context, item.text = item.text, ""
+	end
+	return item.context ~= nil
+end
+
 local function request(buf, item)
+	if not prepare_item(item) then
+		return
+	end
 	local s, generation = state(buf), state(buf).generation
 	local language = config.get().languages[config.get().language]
 	local output = ""
@@ -95,6 +105,9 @@ local function diagnostic_key(diagnostic)
 end
 
 local function request_pair(buf, item, diagnostic)
+	if not prepare_item(item) then
+		return false
+	end
 	local s, generation = state(buf), state(buf).generation
 	local key = diagnostic_key(diagnostic)
 	local output = ""
@@ -253,7 +266,6 @@ function M.explain()
 	if next(s.jobs) then
 		local pending_item = context.at(buf, row, col)
 		if pending_item then
-			pending_item.context, pending_item.text = pending_item.text, ""
 			pair_diagnostic(buf, pending_item)
 		end
 		return
@@ -262,7 +274,6 @@ function M.explain()
 	if not item then
 		return
 	end
-	item.context, item.text = item.text, ""
 	if pair_diagnostic(buf, item) then
 	else
 		request(buf, item)
