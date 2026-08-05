@@ -21,10 +21,16 @@ function M.explainable(buf, row)
 	end
 	local ok, node = pcall(vim.treesitter.get_node, { bufnr = buf, pos = { row, first - 1 } })
 	while ok and node do
+		local kind = node:type():lower()
+		if kind:find("delimiter", 1, true) then
+			return false
+		end
+		if kind == "code_fence_content" then
+			return true
+		end
 		local start_row = node:range()
 		if node:named() and start_row == row then
-			local kind = node:type():lower()
-			return not kind:find("comment", 1, true) and not kind:find("delimiter", 1, true)
+			return not kind:find("comment", 1, true)
 		end
 		node = node:parent()
 	end
