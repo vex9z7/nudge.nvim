@@ -9,3 +9,9 @@ require("nudge").setup({
 })
 
 assert(vim.fn.exists("#nudge#CursorMoved") == 1, "Nudge CursorMoved handler was not registered")
+
+local context = require("nudge.context")
+vim.bo.filetype = "lua"
+assert(context.allowed(0), "normal file buffer should be allowed")
+vim.bo.buftype = "acwrite"
+assert(not context.allowed(0), "special buffers such as Oil must be ignored")

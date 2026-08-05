@@ -44,7 +44,7 @@ Behavior                                                   *nudge-behavior*
 
 After the cursor is idle on a meaningful Tree-sitter node, Nudge streams an
 explanation below that line. Earlier explanations collapse to a lightbulb.
-Blank, comment, and syntax-only lines are ignored.
+Blank, comment, syntax-only lines, and special buffers are ignored.
 
 For errors and meaningful warnings, Nudge requests a concise diagnostic before
 streaming the explanation. The Nudge diagnostic temporarily takes the focused

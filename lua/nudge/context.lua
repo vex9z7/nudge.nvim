@@ -1,6 +1,5 @@
 local M = {}
 
-local ignored_buftypes = { help = true, prompt = true, quickfix = true, terminal = true }
 local ignored_paths = { "/%.env", "/%.ssh/", "/%.gnupg/", "/secret", "/credential", "%.pem$", "%.key$" }
 
 function M.allowed(buf)

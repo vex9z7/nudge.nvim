@@ -41,7 +41,7 @@ uses `Bearer local`, which works with many local OpenAI-compatible servers.
 
 ## Behavior
 
-- Skip blank, comment, and syntax-only lines using Tree-sitter.
+- Skip blank, comment, syntax-only lines, and special buffers.
 - Keep streams running when the cursor moves; edits cancel in-flight requests.
 - Invalidate explanations whose syntax node, or parent node, was changed.
 - Preserve ordinary diagnostics. On the focused Nudge line, its advice replaces
