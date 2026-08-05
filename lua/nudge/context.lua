@@ -7,10 +7,9 @@ function M.allowed(buf)
 		return false
 	end
 	local path = vim.api.nvim_buf_get_name(buf):lower()
-	return not vim.tbl_contains(ignored_paths, path)
-		and not vim.iter(ignored_paths):any(function(pattern)
-			return path:find(pattern) ~= nil
-		end)
+	return not vim.iter(ignored_paths):any(function(pattern)
+		return path:find(pattern) ~= nil
+	end)
 end
 
 function M.explainable(buf, row)
@@ -25,6 +24,7 @@ function M.explainable(buf, row)
 		if kind:find("delimiter", 1, true) then
 			return false
 		end
+		-- Markdown represents all unparsed fenced code as one node spanning the block.
 		if kind == "code_fence_content" then
 			return true
 		end
