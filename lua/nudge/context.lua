@@ -3,7 +3,7 @@ local M = {}
 local ignored_paths = { "/%.env", "/%.ssh/", "/%.gnupg/", "/secret", "/credential", "%.pem$", "%.key$" }
 
 function M.allowed(buf)
-	if ignored_buftypes[vim.bo[buf].buftype] or not vim.bo[buf].modifiable or vim.bo[buf].filetype == "" then
+	if vim.bo[buf].buftype ~= "" or not vim.bo[buf].modifiable or vim.bo[buf].filetype == "" then
 		return false
 	end
 	local path = vim.api.nvim_buf_get_name(buf):lower()
