@@ -251,6 +251,10 @@ function M.explain()
 		return
 	end
 	if next(s.jobs) then
+		local pending_item = context.at(buf, row, col)
+		if pending_item then
+			pair_diagnostic(buf, pending_item)
+		end
 		return
 	end
 	local item = context.at(buf, row, col)
@@ -259,7 +263,6 @@ function M.explain()
 	end
 	item.context, item.text = item.text, ""
 	if pair_diagnostic(buf, item) then
-		s.entries[row] = item
 	else
 		request(buf, item)
 	end
