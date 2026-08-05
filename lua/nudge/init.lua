@@ -253,6 +253,7 @@ function M.explain()
 	if next(s.jobs) then
 		local pending_item = context.at(buf, row, col)
 		if pending_item then
+			pending_item.context, pending_item.text = pending_item.text, ""
 			pair_diagnostic(buf, pending_item)
 		end
 		return
