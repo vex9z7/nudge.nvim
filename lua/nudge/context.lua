@@ -23,7 +23,8 @@ function M.explainable(buf, row)
 	while ok and node do
 		local start_row = node:range()
 		if node:named() and start_row == row then
-			return not node:type():lower():find("comment", 1, true)
+			local kind = node:type():lower()
+			return not kind:find("comment", 1, true) and not kind:find("delimiter", 1, true)
 		end
 		node = node:parent()
 	end
