@@ -48,6 +48,9 @@ end
 
 function M.render(buf, entry)
 	vim.api.nvim_buf_clear_namespace(buf, explain_ns, entry.row, entry.row + 1)
+	if entry.text == "" then
+		return
+	end
 	local current = vim.api.nvim_get_current_buf() == buf and vim.api.nvim_win_get_cursor(0)[1] - 1 == entry.row
 	if not current then
 		local line = vim.api.nvim_buf_get_lines(buf, entry.row, entry.row + 1, false)[1] or ""
@@ -107,6 +110,10 @@ end
 
 function M.pairs(buf)
 	return vim.diagnostic.get(buf, { namespace = pair_ns })
+end
+
+function M.is_pair(diagnostic)
+	return diagnostic.namespace == pair_ns
 end
 
 function M.set_pair(buf, diagnostic, message)

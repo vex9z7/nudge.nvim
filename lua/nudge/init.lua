@@ -77,8 +77,26 @@ local function request(buf, item)
 	end
 end
 
+local function primary_diagnostic(buf, row)
+	local diagnostics = vim.tbl_filter(function(diagnostic)
+		return not ui.is_pair(diagnostic)
+	end, vim.diagnostic.get(buf, { lnum = row }))
+	table.sort(diagnostics, function(a, b)
+		return a.severity < b.severity
+	end)
+	return diagnostics[1]
+end
+
+local function diagnostic_key(diagnostic)
+	return table.concat(
+		{ diagnostic.lnum, diagnostic.col, diagnostic.severity, diagnostic.source, diagnostic.message },
+		":"
+	)
+end
+
 local function request_pair(buf, item, diagnostic)
 	local s, generation = state(buf), state(buf).generation
+	local key = diagnostic_key(diagnostic)
 	local output = ""
 	local job
 	job = client.stream(
@@ -106,7 +124,8 @@ local function request_pair(buf, item, diagnostic)
 			on_exit = function()
 				s.jobs[job] = nil
 				output = vim.trim(output)
-				if s.generation == generation then
+				local current = primary_diagnostic(buf, item.row)
+				if s.generation == generation and current and diagnostic_key(current) == key then
 					if output ~= "" and output:upper() ~= "SKIP" then
 						ui.set_pair(buf, diagnostic, output)
 					end
@@ -123,15 +142,11 @@ local function request_pair(buf, item, diagnostic)
 end
 
 local function pair_diagnostic(buf, item)
-	local diagnostics = vim.diagnostic.get(buf, { lnum = item.row })
-	table.sort(diagnostics, function(a, b)
-		return a.severity < b.severity
-	end)
-	local diagnostic = diagnostics[1]
+	local diagnostic = primary_diagnostic(buf, item.row)
 	if not diagnostic or diagnostic.severity > vim.diagnostic.severity.WARN then
 		return false
 	end
-	local fingerprint = table.concat({ diagnostic.lnum, diagnostic.col, diagnostic.severity, diagnostic.message }, ":")
+	local fingerprint = diagnostic_key(diagnostic)
 	if state(buf).pair_seen[fingerprint] then
 		return false
 	end
@@ -232,7 +247,9 @@ function M.explain()
 		return
 	end
 	item.context, item.text = item.text, ""
-	if not pair_diagnostic(buf, item) then
+	if pair_diagnostic(buf, item) then
+		s.entries[row] = item
+	else
 		request(buf, item)
 	end
 end
@@ -260,6 +277,9 @@ function M.setup(opts)
 			vim.schedule(function()
 				if vim.api.nvim_buf_is_valid(args.buf) then
 					prune_pair(args.buf)
+					if vim.api.nvim_get_current_buf() == args.buf then
+						M.explain()
+					end
 				end
 			end)
 		end,
