@@ -8,7 +8,7 @@ local buffers = {}
 
 local function state(buf)
 	if not buffers[buf] then
-		buffers[buf] = { generation = 0, entries = {}, jobs = {}, pair_seen = {} }
+		buffers[buf] = { generation = 0, entries = {}, jobs = {}, pair_seen = {}, pair_pending = {} }
 	end
 	return buffers[buf]
 end
@@ -123,9 +123,13 @@ local function request_pair(buf, item, diagnostic)
 			end,
 			on_exit = function()
 				s.jobs[job] = nil
+				s.pair_pending[key] = nil
 				output = vim.trim(output)
 				local current = primary_diagnostic(buf, item.row)
 				if s.generation == generation and current and diagnostic_key(current) == key then
+					if output ~= "" then
+						s.pair_seen[key] = true
+					end
 					if output ~= "" and output:upper() ~= "SKIP" then
 						ui.set_pair(buf, diagnostic, output)
 					end
@@ -147,11 +151,16 @@ local function pair_diagnostic(buf, item)
 		return false
 	end
 	local fingerprint = diagnostic_key(diagnostic)
-	if state(buf).pair_seen[fingerprint] then
+	local s = state(buf)
+	if s.pair_seen[fingerprint] or s.pair_pending[fingerprint] then
 		return false
 	end
-	state(buf).pair_seen[fingerprint] = true
-	return request_pair(buf, item, diagnostic)
+	s.pair_pending[fingerprint] = true
+	if request_pair(buf, item, diagnostic) then
+		return true
+	end
+	s.pair_pending[fingerprint] = nil
+	return false
 end
 
 local function clear_changed(buf, firstline, lastline, new_lastline)
@@ -164,6 +173,8 @@ local function clear_changed(buf, firstline, lastline, new_lastline)
 		pcall(vim.fn.jobstop, job)
 	end
 	s.jobs = {}
+	s.pair_seen = {}
+	s.pair_pending = {}
 	local last_changed = math.max(lastline, new_lastline)
 	for _, pair in ipairs(ui.pairs(buf)) do
 		if pair.lnum >= firstline and pair.lnum < last_changed then
