@@ -10,6 +10,7 @@ require("nudge").setup({
 
 assert(vim.fn.exists("#nudge#CursorMoved") == 1, "Nudge CursorMoved handler was not registered")
 assert(vim.fn.exists("#nudge#ModeChanged") == 1, "Nudge ModeChanged handler was not registered")
+assert(vim.fn.exists("#nudge#TextChanged") == 1, "Nudge TextChanged handler was not registered")
 
 local context = require("nudge.context")
 vim.bo.filetype = "lua"

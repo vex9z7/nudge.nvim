@@ -321,8 +321,23 @@ function M.setup(opts)
 	})
 	vim.api.nvim_create_autocmd("ModeChanged", {
 		group = group,
-		callback = function()
-			if vim.fn.mode() ~= "n" then
+		callback = function(args)
+			if vim.fn.mode() == "n" then
+				reset_idle_timer(args.buf)
+			else
+				cancel_idle_timer()
+			end
+		end,
+	})
+	vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "TextChangedP" }, {
+		group = group,
+		callback = function(args)
+			if vim.api.nvim_get_current_buf() ~= args.buf then
+				return
+			end
+			if vim.fn.mode() == "n" then
+				reset_idle_timer(args.buf)
+			else
 				cancel_idle_timer()
 			end
 		end,
@@ -343,6 +358,7 @@ function M.setup(opts)
 	vim.api.nvim_create_autocmd("BufLeave", {
 		group = group,
 		callback = function(args)
+			cancel_idle_timer()
 			vim.schedule(function()
 				if vim.api.nvim_buf_is_valid(args.buf) then
 					ui.render_pair(args.buf)

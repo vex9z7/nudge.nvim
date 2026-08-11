@@ -7,8 +7,8 @@ then streams one explanation below that line. Existing explanations collapse to
 one lightbulb marker. Errors and meaningful warnings first receive a short
 **Nudge** diagnostic that states the cause.
 
-The idle delay defaults to 1200 ms and is reset by every cursor movement or
-when leaving Normal mode. Set `idle_ms` in `setup` to tune it.
+The idle delay defaults to 1200 ms and is reset by cursor movement, edits,
+buffer switches, and mode changes. Set `idle_ms` in `setup` to tune it.
 
 ## Requirements
 

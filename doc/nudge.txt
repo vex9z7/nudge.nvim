@@ -47,8 +47,8 @@ After the cursor is idle on a meaningful Tree-sitter node, Nudge streams an
 explanation below that line. Earlier explanations collapse to a lightbulb.
 Blank, comment, syntax-only lines, and special buffers are ignored.
 
-The idle delay is 1200 ms by default. Every cursor movement and leaving Normal
-mode resets it; set `idle_ms` in |nudge-setup| to tune the delay.
+The idle delay is 1200 ms by default. Cursor movement, edits, buffer switches,
+and mode changes reset it; set `idle_ms` in |nudge-setup| to tune the delay.
 
 For errors and meaningful warnings, Nudge requests a concise diagnostic before
 streaming the explanation. The Nudge diagnostic temporarily takes the focused
