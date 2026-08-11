@@ -7,6 +7,9 @@ then streams one explanation below that line. Existing explanations collapse to
 one lightbulb marker. Errors and meaningful warnings first receive a short
 **Nudge** diagnostic that states the cause.
 
+The idle delay defaults to 1200 ms and is reset by every cursor movement or
+when leaving Normal mode. Set `idle_ms` in `setup` to tune it.
+
 ## Requirements
 
 - Neovim 0.10+ with Tree-sitter parsing
@@ -23,6 +26,7 @@ one lightbulb marker. Errors and meaningful warnings first receive a short
       endpoint = "https://example.com/v1/chat/completions",
       model = "your-model",
       api_key_env = "OPENAI_API_KEY", -- optional; defaults to LLAMACPP_API_KEY
+      idle_ms = 1200, -- optional
       language = "en",
       languages = {
         en = {

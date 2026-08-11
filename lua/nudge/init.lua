@@ -5,6 +5,32 @@ local ui = require("nudge.ui")
 
 local M = {}
 local buffers = {}
+local idle_timer
+local idle_generation = 0
+
+local function cancel_idle_timer()
+	idle_generation = idle_generation + 1
+	if idle_timer then
+		idle_timer:stop()
+		idle_timer:close()
+		idle_timer = nil
+	end
+end
+
+local function reset_idle_timer(buf)
+	cancel_idle_timer()
+	local generation = idle_generation
+	idle_timer = vim.defer_fn(function()
+		idle_timer = nil
+		if
+			generation == idle_generation
+			and vim.api.nvim_buf_is_valid(buf)
+			and vim.api.nvim_get_current_buf() == buf
+		then
+			M.explain()
+		end
+	end, config.get().idle_ms)
+end
 
 local function state(buf)
 	if not buffers[buf] then
@@ -290,11 +316,15 @@ function M.setup(opts)
 			ui.render_all(args.buf, state(args.buf).entries)
 			ui.render_pair(args.buf)
 			ui.refresh_diagnostics(args.buf)
-			vim.defer_fn(function()
-				if vim.api.nvim_buf_is_valid(args.buf) and vim.api.nvim_get_current_buf() == args.buf then
-					M.explain()
-				end
-			end, 1200)
+			reset_idle_timer(args.buf)
+		end,
+	})
+	vim.api.nvim_create_autocmd("ModeChanged", {
+		group = group,
+		callback = function()
+			if vim.fn.mode() ~= "n" then
+				cancel_idle_timer()
+			end
 		end,
 	})
 	vim.api.nvim_create_autocmd("DiagnosticChanged", {

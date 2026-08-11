@@ -16,6 +16,7 @@ Nudge does not define keymaps. Configure it from your plugin manager:
     endpoint = "https://example.com/v1/chat/completions",
     model = "your-model",
     api_key_env = "OPENAI_API_KEY",
+    idle_ms = 1200,
     language = "en",
     languages = {
       en = {
@@ -45,6 +46,9 @@ Behavior                                                   *nudge-behavior*
 After the cursor is idle on a meaningful Tree-sitter node, Nudge streams an
 explanation below that line. Earlier explanations collapse to a lightbulb.
 Blank, comment, syntax-only lines, and special buffers are ignored.
+
+The idle delay is 1200 ms by default. Every cursor movement and leaving Normal
+mode resets it; set `idle_ms` in |nudge-setup| to tune the delay.
 
 For errors and meaningful warnings, Nudge requests a concise diagnostic before
 streaming the explanation. The Nudge diagnostic temporarily takes the focused
