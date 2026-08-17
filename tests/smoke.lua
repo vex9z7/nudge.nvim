@@ -29,3 +29,25 @@ if ok then
 	assert(not context.explainable(markdown, 2), "closing code fence must be ignored")
 end
 vim.api.nvim_buf_delete(markdown, { force = true })
+
+local client = require("nudge.client")
+local original_jobstart, received = vim.fn.jobstart, ""
+vim.fn.jobstart = function(_, callbacks)
+	local function chunk(content, field)
+		return "data: " .. vim.json.encode({ choices = { { delta = { [field] = content } } } })
+	end
+	callbacks.on_stdout(nil, { chunk("Before <thi", "content"), "" })
+	callbacks.on_stdout(nil, { chunk("nk>hidden</th", "content"), "" })
+	callbacks.on_stdout(nil, { chunk("ink> after\0", "content"), "" })
+	callbacks.on_stdout(nil, { chunk("ignored", "reasoning_content"), "" })
+	callbacks.on_exit()
+	return 1
+end
+client.stream({}, {
+	on_token = function(token)
+		received = received .. token
+	end,
+	on_exit = function() end,
+})
+vim.fn.jobstart = original_jobstart
+assert(received == "Before  after", "Nudge must hide thinking content and control characters")
