@@ -46,7 +46,14 @@ local function refresh_diagnostics(buf)
 	end
 end
 
+local function valid_row(buf, row)
+	return vim.api.nvim_buf_is_valid(buf) and row >= 0 and row < vim.api.nvim_buf_line_count(buf)
+end
+
 function M.render(buf, entry)
+	if not valid_row(buf, entry.row) then
+		return
+	end
 	vim.api.nvim_buf_clear_namespace(buf, explain_ns, entry.row, entry.row + 1)
 	if entry.text == "" then
 		return
@@ -84,6 +91,9 @@ function M.render_pair(buf)
 	vim.api.nvim_buf_clear_namespace(buf, pair_visual_ns, 0, -1)
 	local diagnostic = current_pair(buf)
 	if not diagnostic then
+		return
+	end
+	if not valid_row(buf, diagnostic.lnum) then
 		return
 	end
 	local line = vim.api.nvim_buf_get_lines(buf, diagnostic.lnum, diagnostic.lnum + 1, false)[1] or ""
