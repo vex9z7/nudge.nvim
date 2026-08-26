@@ -313,9 +313,10 @@ function M.setup(opts)
 	vim.api.nvim_create_autocmd("CursorMoved", {
 		group = group,
 		callback = function(args)
-			ui.render_all(args.buf, state(args.buf).entries)
-			ui.render_pair(args.buf)
-			ui.refresh_diagnostics(args.buf)
+			local s = state(args.buf)
+			local row = vim.api.nvim_win_get_cursor(0)[1] - 1
+			ui.cursor_moved(args.buf, s.entries, s.cursor_row, row)
+			s.cursor_row = row
 			reset_idle_timer(args.buf)
 		end,
 	})

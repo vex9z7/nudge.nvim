@@ -30,12 +30,15 @@ local function wrapped(text, width)
 	return parts
 end
 
+local function pair_at(buf, row)
+	return vim.diagnostic.get(buf, { namespace = pair_ns, lnum = row })[1]
+end
+
 local function current_pair(buf)
 	if vim.api.nvim_get_current_buf() ~= buf then
 		return
 	end
-	local row = vim.api.nvim_win_get_cursor(0)[1] - 1
-	return vim.diagnostic.get(buf, { namespace = pair_ns, lnum = row })[1]
+	return pair_at(buf, vim.api.nvim_win_get_cursor(0)[1] - 1)
 end
 
 local function refresh_diagnostics(buf)
@@ -84,6 +87,23 @@ function M.render_all(buf, entries)
 	vim.api.nvim_buf_clear_namespace(buf, explain_ns, 0, -1)
 	for _, entry in pairs(entries) do
 		M.render(buf, entry)
+	end
+end
+
+-- Cursor moves only change the old and new explanation rows. Redrawing every
+-- entry (and every diagnostic namespace) here makes held j/k noticeably laggy.
+function M.cursor_moved(buf, entries, previous_row, row)
+	if previous_row and previous_row ~= row and entries[previous_row] then
+		M.render(buf, entries[previous_row])
+	end
+	if entries[row] then
+		M.render(buf, entries[row])
+	end
+
+	local pair_changed = (previous_row and pair_at(buf, previous_row)) or pair_at(buf, row)
+	if pair_changed then
+		M.render_pair(buf)
+		refresh_diagnostics(buf)
 	end
 end
 
